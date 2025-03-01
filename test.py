@@ -9,7 +9,7 @@ if __name__ == '__main__':
         model="tiny",
         spinner=True,
         silero_sensitivity=0.9,
-        realtime_batch_size=0.5,
+        realtime_batch_size=1,
         enable_realtime_transcription=True,
         realtime_model_type="tiny.en",
         post_speech_silence_duration=0.01,

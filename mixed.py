@@ -1,9 +1,17 @@
 from RealtimeSTT import AudioToTextRecorder
 
 def print_text(text):
-    print(text)
+    if text:
+        # process_input(text=text)
+        print(f" {text}")
+    else:
+        pass
 
-def process_text(text):
+# Gonna remove duplicates before writing 
+def process_input(text):
+    pass
+
+def placeholder(text):
     pass
 
 if __name__ == '__main__':
@@ -27,7 +35,7 @@ if __name__ == '__main__':
         'silero_deactivity_detection': True,
         'early_transcription_on_silence': 0,
         'beam_size': 5,
-        'beam_size_realtime': 3,
+        'beam_size_realtime': 1,
         'batch_size': 0,
         'realtime_batch_size': 0,        
         'no_log_file': True,
@@ -35,14 +43,16 @@ if __name__ == '__main__':
         'ensure_sentence_starting_uppercase': False,
         'print_transcription_time': True,
         'allowed_latency_limit': 5,
-        'disable_final_transcription': True,
+        'device': "cuda",
+        'desired_overlap_duration': 0.003
     }
 
     recorder = AudioToTextRecorder(**recorder_config)
 
     try:
+        print("Start yapping")
         while True:
-            recorder.text(process_text)
+            recorder.text(placeholder)
     except KeyboardInterrupt:
         print("user stopped transcription")
         exit(0)

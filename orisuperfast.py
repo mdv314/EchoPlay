@@ -21,15 +21,15 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--root', type=str, # no default=None,
                 help='Root directory where the Whisper models are downloaded to.')
 
-    from install_packages import check_and_install_packages
-    check_and_install_packages([
-        {
-            'import_name': 'rich',
-        },
-        {
-            'import_name': 'pyautogui',
-        }        
-    ])
+    # from install_packages import check_and_install_packages
+    # check_and_install_packages([
+    #     {
+    #         'import_name': 'rich',
+    #     },
+    #     {
+    #         'import_name': 'pyautogui',
+    #     }        
+    # ])
 
     if EXTENDED_LOGGING:
         import logging
@@ -203,7 +203,6 @@ if __name__ == '__main__':
     
     initial_text = Panel(Text("Say something...", style="cyan bold"), title="[bold yellow]Waiting for Input[/bold yellow]", border_style="bold yellow")
     live.update(initial_text)
-
 
     try:
         while True:
