@@ -9,9 +9,17 @@ import multiprocessing
 
 gamepad = vg.VX360Gamepad()
 
+
+
+
+
 def input_cleaner(str_inp):
     cleaned = str_inp.translate(str.maketrans('', '', string.punctuation)).lower()
     return " ".join(cleaned.split())
+
+
+
+
 
 # Generates a map from the profile, key: keyword, value: [action1, action2, ...]
 def generate_map(filename):
@@ -37,6 +45,9 @@ def generate_map(filename):
     } # it just makes a double ended queue for the value with the key being keyword
     return action_map, mode
 
+
+
+
 # multithreading  shared queue
 #                 |      selected profile
 #                 |      |
@@ -49,7 +60,7 @@ def process_queue(queue, profile_name):
         while True:
             # xbox mode
             if mode == "xbox":
-
+                
                 # await input to the shared multithreading queue
                 TEST_input = queue.get()
                 # stop escape from gui.py / writer.py
