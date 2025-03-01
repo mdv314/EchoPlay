@@ -11,3 +11,4 @@ websockets==14.2
 websocket-client==1.8.0
 numpy<2.0.0
 RealtimeSTT==0.3.95
+vgamepad==0.1.0
