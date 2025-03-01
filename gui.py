@@ -1,7 +1,6 @@
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
-import subprocess
 import multiprocessing
 from handler import process_queue, input_cleaner
 from writer import write_to_queue
@@ -238,8 +237,6 @@ def play_action():
         edit_profiles()  # Open the profile editor
     elif selected_profile:
         messagebox.showinfo("Play", f"Playing with profile: {selected_profile}")
-        solution_dir = os.path.dirname(os.path.abspath(__file__))
-        venv_python = os.path.join(solution_dir, "echoplay", "bin", "python")
         start_handler(selected_profile)  # Start game handler
     else:
         messagebox.showwarning("Warning", "Please select a profile.")
