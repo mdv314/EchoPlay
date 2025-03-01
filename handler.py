@@ -1,3 +1,5 @@
+import string
+
 import vgamepad as vg
 import json
 import os
@@ -5,6 +7,10 @@ import time
 from collections import deque
 
 gamepad = vg.VX360Gamepad()
+
+def input_cleaner(str_inp):
+    cleaned = str_inp.translate(str.maketrans('', '', string.punctuation)).lower()
+    return " ".join(cleaned.split())
 
 
 def generate_map(filename):
@@ -28,7 +34,7 @@ if __name__ == "__main__":
         print(f"{action}: {list(commands)}")
     while True:
         if mode == "xbox":
-            TEST_input = input("DEV // Input command from map: ")
+            TEST_input = input_cleaner(input("DEV // Input command from map: "))
             execution_items = action_map.get(TEST_input)
             if execution_items:
                 iterator = iter(execution_items)
