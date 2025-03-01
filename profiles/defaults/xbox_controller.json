@@ -1,0 +1,194 @@
+{
+    "mode": "xbox",
+    "keywords": [
+      {
+        "keyword": "soft left",
+        "keymap": ["left_joystick_float", -0.5, 0.0, 0.5, "left_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "hard left",
+        "keymap": ["left_joystick_float", -1.0, 0.0, 0.5, "left_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "soft right",
+        "keymap": ["left_joystick_float", 0.5, 0.0, 0.5, "left_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "hard right",
+        "keymap": ["left_joystick_float", 1.0, 0.0, 0.5, "left_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "soft up",
+        "keymap": ["left_joystick_float", 0.0, 0.5, 0.5, "left_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "hard up",
+        "keymap": ["left_joystick_float", 0.0, 1.0, 0.5, "left_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "soft down",
+        "keymap": ["left_joystick_float", 0.0, -0.5, 0.5, "left_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "hard down",
+        "keymap": ["left_joystick_float", 0.0, -1.0, 0.5, "left_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "soft upper left",
+        "keymap": ["left_joystick_float", -0.5, 0.5, 0.5, "left_joystick_float", 0, 0]
+      },
+      { 
+        "keyword": "hard upper left",
+        "keymap": ["left_joystick_float", -1.0, 1.0, 0.5, "left_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "soft upper right",
+        "keymap": ["left_joystick_float", 0.5, 0.5, 0.5, "left_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "hard upper right",
+        "keymap": ["left_joystick_float", 1.0, 1.0, 0.5, "left_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "soft lower left",
+        "keymap": ["left_joystick_float", -0.5, -0.5, 0.5, "left_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "hard lower left",
+        "keymap": ["left_joystick_float", -1.0, -1.0, 0.5, "left_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "soft lower right",
+        "keymap": ["left_joystick_float", 0.5, -0.5, 0.5, "left_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "hard lower right",
+        "keymap": ["left_joystick_float", 1.0, -1.0, 0.5, "left_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look soft left",
+        "keymap": ["right_joystick_float", -0.5, 0.0, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look hard left",
+        "keymap": ["right_joystick_float", -1.0, 0.0, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look soft right",
+        "keymap": ["right_joystick_float", 0.5, 0.0, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look hard right",
+        "keymap": ["right_joystick_float", 1.0, 0.0, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look soft up",
+        "keymap": ["right_joystick_float", 0.0, 0.5, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look hard up",
+        "keymap": ["right_joystick_float", 0.0, 1.0, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look soft down",
+        "keymap": ["right_joystick_float", 0.0, -0.5, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look hard down",
+        "keymap": ["right_joystick_float", 0.0, -1.0, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look soft upper left",
+        "keymap": ["right_joystick_float", -0.5, 0.5, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look hard upper left",
+        "keymap": ["right_joystick_float", -1.0, 1.0, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look soft upper right",
+        "keymap": ["right_joystick_float", 0.5, 0.5, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look hard upper right",
+        "keymap": ["right_joystick_float", 1.0, 1.0, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look soft lower left",
+        "keymap": ["right_joystick_float", -0.5, -0.5, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look hard lower left",
+        "keymap": ["right_joystick_float", -1.0, -1.0, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look soft lower right",
+        "keymap": ["right_joystick_float", 0.5, -0.5, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "look hard lower right",
+        "keymap": ["right_joystick_float", 1.0, -1.0, 0.5, "right_joystick_float", 0, 0]
+      },
+      {
+        "keyword": "a",
+        "keymap": ["pressXUSB_GAMEPAD_A", 0.5, "releaseXUSB_GAMEPAD_A"]
+      },
+      {
+        "keyword": "b",
+        "keymap": ["pressXUSB_GAMEPAD_B", 0.5, "releaseXUSB_GAMEPAD_B"]
+      },
+      {
+        "keyword": "x",
+        "keymap": ["pressXUSB_GAMEPAD_X", 0.5, "releaseXUSB_GAMEPAD_X"]
+      },
+      {
+        "keyword": "y",
+        "keymap": ["pressXUSB_GAMEPAD_Y", 0.5, "releaseXUSB_GAMEPAD_Y"]
+      },
+      {
+        "keyword": "trigger right",
+        "keymap": ["right_trigger_float", 1.0, 0.5, "right_trigger_float", 0.0]
+      },
+      {
+        "keyword": "trigger left",
+        "keymap": ["left_trigger_float", 1.0, 0.5, "left_trigger_float", 0.0]
+      },
+      {
+        "keyword": "bumper right",
+        "keymap": ["pressXUSB_GAMEPAD_RIGHT_SHOULDER", 0.5, "releaseXUSB_GAMEPAD_RIGHT_SHOULDER"]
+      },
+      {
+        "keyword": "bumper left",
+        "keymap": ["pressXUSB_GAMEPAD_LEFT_SHOULDER", 0.5, "releaseXUSB_GAMEPAD_LEFT_SHOULDER"]
+      },
+      {
+        "keyword": "dpad up",
+        "keymap": ["pressXUSB_GAMEPAD_DPAD_UP", 0.5, "releaseXUSB_GAMEPAD_DPAD_UP"]
+      },
+      {
+        "keyword": "dpad down",
+        "keymap": ["pressXUSB_GAMEPAD_DPAD_DOWN", 0.5, "releaseXUSB_GAMEPAD_DPAD_DOWN"]
+      },
+      {
+        "keyword": "dpad left",
+        "keymap": ["pressXUSB_GAMEPAD_DPAD_LEFT", 0.5, "releaseXUSB_GAMEPAD_DPAD_LEFT"]
+      },
+      {
+        "keyword": "dpad right",
+        "keymap": ["pressXUSB_GAMEPAD_DPAD_RIGHT", 0.5, "releaseXUSB_GAMEPAD_DPAD_RIGHT"]
+      },
+      {
+        "keyword": "select",
+        "keymap": ["pressXUSB_GAMEPAD_BACK", 0.5, "releaseXUSB_GAMEPAD_BACK"]
+      },
+      {
+        "keyword": "start",
+        "keymap": ["pressXUSB_GAMEPAD_START", 0.5, "releaseXUSB_GAMEPAD_START"]
+      },
+      {
+        "keyword": "xbox button",
+        "keymap": ["pressXUSB_GAMEPAD_GUIDE", 0.5, "releaseXUSB_GAMEPAD_GUIDE"]
+      }
+    ]
+  }
+  
