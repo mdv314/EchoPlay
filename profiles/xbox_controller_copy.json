@@ -130,19 +130,19 @@
       "keymap": ["right_joystick_float", 1.0, -1.0, 0.5, "right_joystick_float", 0, 0]
     },
     {
-      "keyword": "A",
+      "keyword": "a",
       "keymap": ["pressXUSB_GAMEPAD_A", 0.5, "releaseXUSB_GAMEPAD_A"]
     },
     {
-      "keyword": "B",
+      "keyword": "b",
       "keymap": ["pressXUSB_GAMEPAD_B", 0.5, "releaseXUSB_GAMEPAD_B"]
     },
     {
-      "keyword": "X",
+      "keyword": "x",
       "keymap": ["pressXUSB_GAMEPAD_X", 0.5, "releaseXUSB_GAMEPAD_X"]
     },
     {
-      "keyword": "Y",
+      "keyword": "y",
       "keymap": ["pressXUSB_GAMEPAD_Y", 0.5, "releaseXUSB_GAMEPAD_Y"]
     },
     {
