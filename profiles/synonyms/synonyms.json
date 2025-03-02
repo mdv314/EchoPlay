@@ -1,15 +1,24 @@
 {
     "synonyms": [
         {
-            "keyword_match": "b",
+            "keyword_match": "y",
             "synonym_words": [
-                "be"
+                "why",
+                "A"
             ]
         },
         {
-            "keyword_match": "y",
+            "keyword_match": "b",
             "synonym_words": [
-                "why"
+                "b i said",
+                "us"
+            ]
+        },
+        {
+            "keyword_match": "trigger right",
+            "synonym_words": [
+                "apple trick",
+                "left laptop eat"
             ]
         }
     ]

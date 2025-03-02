@@ -1,0 +1,31 @@
+{
+    "mode": "xbox",
+    "keywords": [
+        {
+            "keyword": "b",
+            "keymap": [
+                "pressXUSB_GAMEPAD_B",
+                0.5,
+                "releaseXUSB_GAMEPAD_B"
+            ]
+        },
+        {
+            "keyword": "y",
+            "keymap": [
+                "pressXUSB_GAMEPAD_Y",
+                0.5,
+                "releaseXUSB_GAMEPAD_Y"
+            ]
+        },
+        {
+            "keyword": "trigger right",
+            "keymap": [
+                "right_trigger_float",
+                1.0,
+                0.5,
+                "right_trigger_float",
+                0.0
+            ]
+        }
+    ]
+}
