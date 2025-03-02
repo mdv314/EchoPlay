@@ -1,4 +1,4 @@
-from RealtimeSTT import AudioToTextRecorder
+from audio_recorder import AudioToTextRecorder
 import multiprocessing
 # from handler import input_cleaner
 
@@ -11,7 +11,7 @@ def input_cleaner(str_inp):
 
 def print_text(text):
     if text:
-        print(f" {text}")
+        # print(f" {text}")
         process_input(text, queue)
         # print(f" {text}")
     else:
@@ -20,26 +20,35 @@ def print_text(text):
 # Gonna remove duplicates before writing (replacement for writer.py)
 def process_input(text, queue):
     # use input cleaning function from handler to clean data
-    global prev
-    prev = []
+    f = open("model_output.txt", "a")
     text = input_cleaner(text)
     input = text.split(' ')
     
     ############# custom data structure #############
     # when the prev list is empty append the current input
-    if len(prev) == 0:
-        prev.append(input)
-        for str in input:
-            queue.put(str)
-    # when the list isn't empty
-    else:
-        n = len(input)
-        # if the given input is not the same as what was previously saw (removing the duplcates)
-        if input != prev[-n:]:
-            prev.clear()
-            for str in input:
-                queue.put(str)
-                prev.append(str)
+    # if len(prev) == 0:
+    #     for str in input:
+    #         f.write(f"{str} ")
+    #         queue.put(str)
+    #         prev.append(str)
+    #     f.write("\n")
+    # # when the list isn't empty
+    # else:
+    f.write(f"prev before: {prev}\n")
+    while prev != input[:len(prev)] and len(prev)>0:
+        # the first n words of input (where n is the length of previous)
+        prev.pop(0) 
+    f.write(f"prev pop: {prev}\n")
+    
+    for str in input[len(prev):]:
+        f.write(f"{str} ")        
+        queue.put(str)
+        prev.append(str)
+    f.write(f"\n prev after: {prev}\n")
+    f.write("----------------------------------------------")
+    f.write(f"\n")
+
+    f.close()
     pass
     
 
@@ -49,7 +58,8 @@ def placeholder(text):
 
 def voice_model():
     print("WAIT")
-
+    global prev
+    prev = []
 
     recorder_config = {
         'spinner': False,
@@ -107,4 +117,7 @@ def run(multiprocessing_queue):
 
 if __name__ == "__main__":
     queue = multiprocessing.Queue()
+    f = open("model_output.txt", "w")
+    f.write("")
+    f.close()
     run(queue)
