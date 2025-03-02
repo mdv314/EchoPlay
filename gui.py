@@ -1,9 +1,10 @@
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
+import subprocess
 import multiprocessing
 from handler import process_queue, input_cleaner
-from writer import write_to_queue
+from writer import run
 import json
 
 def load_profiles():
@@ -28,7 +29,7 @@ def open_json_table_editor(profile_name, profile_path, data):
     """Opens a window with a table to edit only 'keywords' and 'keymap'."""
     editor_window = tk.Toplevel(tk_root)
     editor_window.title(f"Editing {profile_name}")
-    editor_window.geometry("600x400")
+    editor_window.geometry("1200x800")
 
     tk.Label(editor_window, text=f"Editing: {profile_name}", font=("Arial", 12)).pack(pady=5)
 
@@ -64,6 +65,32 @@ def open_json_table_editor(profile_name, profile_path, data):
                     messagebox.showerror("Error", "Keymap must be a list.")
             except:
                 messagebox.showerror("Error", "Invalid keymap format. Use list format.")
+    def delete_selected_entry():
+        """Deletes the selected keyword-keymap pair."""
+        selected_item = tree.selection()
+        if not selected_item:
+            messagebox.showwarning("Warning", "No item selected.")
+            return
+
+        item = selected_item[0]
+        keyword, _ = tree.item(item, "values")
+
+        # Confirm deletion
+        confirm = messagebox.askyesno("Delete Entry", f"Are you sure you want to delete '{keyword}'?")
+        if confirm:
+            # Remove from Treeview
+            tree.delete(item)
+            
+            # Remove from keywords_data list
+            for entry in keywords_data:
+                if entry["keyword"] == keyword:
+                    keywords_data.remove(entry)
+                    break
+
+    # Add a Delete button below the Treeview
+    delete_button = tk.Button(editor_window, text="Delete Selected", command=delete_selected_entry)
+    delete_button.pack(pady=5)
+
 
     tk.Button(add_frame, text="Add", command=add_new_entry).pack(side="left", padx=5)
 
@@ -112,7 +139,7 @@ def open_json_table_editor(profile_name, profile_path, data):
         new_data = {"mode": data.get("mode", ""), "keywords": keywords_data}
         with open(profile_path, "w") as f:
             json.dump(new_data, f, indent=4)
-        messagebox.showinfo("Success", f"Changes saved to {profile_name}") # do I want
+        messagebox.showinfo("Success", f"Changes saved to {profile_name}") # do I want?
         editor_window.destroy() # close
 
     save_button = tk.Button(editor_window, text="Save Changes", command=save_json)
@@ -122,9 +149,9 @@ def edit_profiles():
     """Opens a simple profile management window."""
     edit_window = tk.Toplevel(tk_root)
     edit_window.title("Edit Profiles")
-    edit_window.geometry("400x300")
+    edit_window.geometry("800x600")
 
-    tk.Label(edit_window, text="Manage Profiles", font=("Arial", 14)).pack(pady=5)
+    tk.Label(edit_window, text="Manage Profiles", font=("Arial", 28)).pack(pady=5) # was 14
 
     profiles_dir = "profiles"
 
@@ -163,8 +190,9 @@ def edit_profiles():
 
     profile_listbox.bind("<Double-Button-1>", open_json_editor)  # Double-click event
 
+
     def add_profile():
-        """Allows users to copy a default profile to create a new profile."""
+        """Allows users to copy a default profile to create a new profile using buttons instead of text input."""
         defaults_dir = os.path.join("profiles", "defaults")  # Folder containing default profiles
         profiles_dir = "profiles"  # Folder where user profiles are stored
 
@@ -179,10 +207,17 @@ def edit_profiles():
             messagebox.showerror("Error", "No default profiles available. Please add defaults to the 'defaults' folder.")
             return
 
-        # Ask the user to select a default profile
-        selected_default = simpledialog.askstring("Select Default", f"Available Defaults:\n" + "\n".join(default_profiles) + "\n\nEnter the name of a default profile to copy:")
+        # Create a selection window
+        select_window = tk.Toplevel(tk_root)
+        select_window.title("Select Default Profile")
+        select_window.geometry("300x200")
 
-        if selected_default and selected_default in default_profiles:
+        tk.Label(select_window, text="Select a default profile:", font=("Arial", 12)).pack(pady=5)
+
+        def create_new_profile(selected_default):
+            """Handles copying a selected default profile and creating a new profile."""
+            select_window.destroy()  # Close the selection window
+
             # Ask for a new profile name
             new_profile_name = simpledialog.askstring("New Profile", "Enter a name for the new profile:")
             if new_profile_name:
@@ -199,10 +234,16 @@ def edit_profiles():
                 # Add to the listbox
                 profile_listbox.insert(tk.END, f"{new_profile_name}.json")
 
+                # Refresh profiles
+                refresh_profiles()
+
                 # Open the new profile in the JSON editor
                 open_json_table_editor(f"{new_profile_name}.json", new_profile_path, default_data)
-        else:
-            messagebox.showwarning("Warning", "Invalid selection or action canceled.")
+
+        # Create a button for each default profile
+        for profile in default_profiles:
+            profile_name = profile  # Keep full name with `.json`
+            tk.Button(select_window, text=profile_name, command=lambda p=profile_name: create_new_profile(p)).pack(pady=2, fill="x")
 
     def delete_profile():
         """Delete the selected profile."""
@@ -228,7 +269,7 @@ def start_handler(profile_name):
     queue = multiprocessing.Queue()
     handler_process = multiprocessing.Process(target=process_queue, args=(queue, profile_name))
     handler_process.start()
-    writer_process = multiprocessing.Process(target=write_to_queue, args=(queue,))
+    writer_process = multiprocessing.Process(target=run, args=(queue,))
     writer_process.start()
 
 def play_action():
@@ -237,6 +278,8 @@ def play_action():
         edit_profiles()  # Open the profile editor
     elif selected_profile:
         messagebox.showinfo("Play", f"Playing with profile: {selected_profile}")
+        solution_dir = os.path.dirname(os.path.abspath(__file__))
+        venv_python = os.path.join(solution_dir, "echoplay", "bin", "python")
         start_handler(selected_profile)  # Start game handler
     else:
         messagebox.showwarning("Warning", "Please select a profile.")
@@ -261,32 +304,31 @@ def refresh_profiles():
     # Rebind event to shift focus to Play button
     profile_menu.bind("<<ComboboxSelected>>", lambda event: play_button.focus())
 
-if __name__ == "__main__":
-    tk_root = tk.Tk()
-    tk_root.title("EchoPlay")
-    tk_root.geometry("800x400")
+tk_root = tk.Tk()
+tk_root.title("EchoPlay")
+tk_root.geometry("800x400")
 
-    profile_var = tk.StringVar()
+profile_var = tk.StringVar()
 
-    tk.Label(tk_root, text="Select Profile:", font=("Arial", 16)).pack(pady=5)
-    profile_menu = ttk.Combobox(tk_root, textvariable=profile_var, state="readonly")
-    profile_menu.pack(pady=5)
+tk.Label(tk_root, text="Select Profile:", font=("Arial", 16)).pack(pady=5)
+profile_menu = ttk.Combobox(tk_root, textvariable=profile_var, state="readonly")
+profile_menu.pack(pady=5)
 
-    refresh_profiles()  # Initialize profiles
+refresh_profiles()  # Initialize profiles
 
-    # Shift focus to the Play button when an option is selected
-    profile_menu.bind("<<ComboboxSelected>>", lambda event: play_button.focus())
+# Shift focus to the Play button when an option is selected
+profile_menu.bind("<<ComboboxSelected>>", lambda event: play_button.focus())
 
-    play_button = tk.Button(tk_root, text="Play", command=play_action)
-    play_button.pack(pady=5)
+play_button = tk.Button(tk_root, text="Play", command=play_action)
+play_button.pack(pady=5)
 
-    about_button = tk.Button(tk_root, text="About", command=about_action)
-    about_button.pack(pady=5)
+about_button = tk.Button(tk_root, text="About", command=about_action)
+about_button.pack(pady=5)
 
-    stop_button = tk.Button(tk_root, text="Stop", command=stop)
-    stop_button.pack(pady=5)
+stop_button = tk.Button(tk_root, text="Stop", command=stop)
+stop_button.pack(pady=5)
 
-    refresh_button = tk.Button(tk_root, text="Refresh Profiles", command=refresh_profiles)
-    refresh_button.pack(pady=5)
+refresh_button = tk.Button(tk_root, text="Refresh Profiles", command=refresh_profiles)
+refresh_button.pack(pady=5)
 
-    tk_root.mainloop()
+tk_root.mainloop()
