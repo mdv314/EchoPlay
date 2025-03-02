@@ -5,7 +5,7 @@ from handler import input_cleaner
 def print_text(text):
     if text:
         print(f" {text}")
-        process_input(text=text, queue=queue)
+        process_input(text, queue)
         # print(f" {text}")
     else:
         pass
@@ -84,7 +84,11 @@ def voice_model():
         print("user stopped transcription")
         exit(0)
 
-if __name__ == "__main__":
+def run(multiprocessing_queue):
     global queue
-    queue = multiprocessing.Queue()
+    queue = multiprocessing_queue
     voice_model()
+
+if __name__ == "__main__":
+    queue = multiprocessing.Queue()
+    run(queue)

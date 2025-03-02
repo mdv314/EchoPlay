@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 import multiprocessing
 from handler import process_queue, input_cleaner
-from writer import process_input
+from writer import run
 import json
 
 def load_profiles():
@@ -228,7 +228,7 @@ def start_handler(profile_name):
     queue = multiprocessing.Queue()
     handler_process = multiprocessing.Process(target=process_queue, args=(queue, profile_name))
     handler_process.start()
-    writer_process = multiprocessing.Process(target=process_input, args=(queue,))
+    writer_process = multiprocessing.Process(target=run, args=(queue,))
     writer_process.start()
 
 def play_action():
