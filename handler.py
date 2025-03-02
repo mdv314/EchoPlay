@@ -25,6 +25,21 @@ def input_cleaner(str_inp):
 def generate_map(filename):
     filename_converted = filename+".json" # converts file name to path
 
+    # synonyms
+    synonyms_path = os.path.join("profiles", "synonyms", "synonyms.json")
+    if os.path.exists(synonyms_path):
+        with open(synonyms_path, "r") as file:
+            synonyms_data = json.load(file)
+    else:
+        synonyms_data = {"synonyms": []}  
+
+    # Create a synonym lookup dictionary (keyword_match -> list of synonyms)
+    synonym_map = {
+        entry["keyword_match"]: entry["synonym_words"]
+        for entry in synonyms_data.get("synonyms", [])
+    }
+
+
     # looking for defaults
     defaults_dir = os.path.join("profiles","defaults")
     if not os.path.exists(defaults_dir):
@@ -37,11 +52,24 @@ def generate_map(filename):
         json_path = os.path.join("profiles", filename_converted)
 
     with open(json_path, "r") as file:
-        keymap = json.load(file)
-    mode = keymap.get("mode") # gets mode (stored in default profiles)
+        keymap_data = json.load(file)
+    mode = keymap_data.get("mode") # gets mode (stored in default profiles)
+    action_map = {}
+    for item in keymap_data.get("keywords", []):
+        keyword = item["keyword"]
+        actions = deque(item["keymap"])
+
+        # add profile mapping
+        action_map[keyword] = actions
+
+        # add synonym mappings
+        if keyword in synonym_map:
+            for synonym in synonym_map[keyword]:
+                action_map[synonym] = actions  
+
     action_map = {
         item["keyword"]: deque(item["keymap"])
-        for item in keymap.get("keywords", [])
+        for item in keymap_data.get("keywords", [])
     } # it just makes a double ended queue for the value with the key being keyword
     return action_map, mode
 
@@ -52,10 +80,10 @@ def generate_map(filename):
 #                 |      |
 def process_queue(queue, profile_name):
         action_map, mode = generate_map(profile_name)
-        print("Mode: ", mode)
-        print("Action Map: ")
+        # print("Mode: ", mode)
+        # print("Action Map: ")
         for action, commands in action_map.items():
-            print(f"{action}: {list(commands)}")
+            # print(f"{action}: {list(commands)}")
         # buffer for inp 1 to 3
         lookahead = []
         while True:
@@ -70,7 +98,7 @@ def process_queue(queue, profile_name):
 
                 # stop button
                 if item == "STOP":
-                    print(f"Handler.py received STOP signal in shared queue. Stopping...")
+                    # print(f"Handler.py received STOP signal in shared queue. Stopping...")
                     sys.exit()
                 
                 # add item to buffer if not ending execution
@@ -78,11 +106,11 @@ def process_queue(queue, profile_name):
 
                 # # clean input
                 # lookahead[0] = input_cleaner(lookahead[0]) #remove to optimize
-                print(f"Handler processing: {item}")
+                # print(f"Handler processing: {item}")
 
                 # debug buffer dump
-                for item_print in lookahead:
-                    print(f"Buffer: {item_print}")
+                for item_# print in lookahead:
+                    # print(f"Buffer: {item_# print}")
 
                 # get the corresponding actions for the input
                 execution_items = action_map.get(lookahead[0])
@@ -145,31 +173,31 @@ def handle_xbox(execution_items, queue):
     for item in iterator:
         # xbox type handling
         if isinstance(item, int) or isinstance(item, float): # If number, sleep for that many seconds
-            print(f"Sleep for {float(item)*1000} ms")
+            # print(f"Sleep for {float(item)*1000} ms")
             time.sleep(float(item))
         elif item.startswith("press"): # pressing any button
             new_item = item[5:]
-            print(f"Press: {new_item}")
+            # print(f"Press: {new_item}")
             gamepad.press_button(button=getattr(vg.XUSB_BUTTON, new_item))
             gamepad.update()
         elif item.startswith("release"): # releasing any button
             new_item = item[7:]
-            print(f"Release: {new_item}")
+            # print(f"Release: {new_item}")
             gamepad.release_button(getattr(vg.XUSB_BUTTON, new_item))
             gamepad.update()
         elif item.find("joystick") != -1: # joystick inputs
             x_val = next(iterator)
             y_val = next(iterator)
-            print(f"Move {item}: X: {x_val}, Y: {y_val}")
+            # print(f"Move {item}: X: {x_val}, Y: {y_val}")
             getattr(gamepad,item)(x_val,y_val)
             gamepad.update()
         elif item.find("trigger") != -1: # trigger inputs
             intensity = next(iterator)
-            print(f"Press {item}: intensity: {intensity}")
+            # print(f"Press {item}: intensity: {intensity}")
             getattr(gamepad,item)(intensity)
             gamepad.update()
         else: # anything else (theres no button not covered here. this is for errors in making a new json file)
-            print(f"Invalid action item: {item}") 
+            # print(f"Invalid action item: {item}") 
 
 
 if __name__ == "__main__":

@@ -304,31 +304,33 @@ def refresh_profiles():
     # Rebind event to shift focus to Play button
     profile_menu.bind("<<ComboboxSelected>>", lambda event: play_button.focus())
 
-tk_root = tk.Tk()
-tk_root.title("EchoPlay")
-tk_root.geometry("800x400")
 
-profile_var = tk.StringVar()
+if __name__ == "__main__":
+    tk_root = tk.Tk()
+    tk_root.title("EchoPlay")
+    tk_root.geometry("800x400")
 
-tk.Label(tk_root, text="Select Profile:", font=("Arial", 16)).pack(pady=5)
-profile_menu = ttk.Combobox(tk_root, textvariable=profile_var, state="readonly")
-profile_menu.pack(pady=5)
+    profile_var = tk.StringVar()
 
-refresh_profiles()  # Initialize profiles
+    tk.Label(tk_root, text="Select Profile:", font=("Arial", 16)).pack(pady=5)
+    profile_menu = ttk.Combobox(tk_root, textvariable=profile_var, state="readonly")
+    profile_menu.pack(pady=5)
 
-# Shift focus to the Play button when an option is selected
-profile_menu.bind("<<ComboboxSelected>>", lambda event: play_button.focus())
+    refresh_profiles()  # Initialize profiles
 
-play_button = tk.Button(tk_root, text="Play", command=play_action)
-play_button.pack(pady=5)
+    # Shift focus to the Play button when an option is selected
+    profile_menu.bind("<<ComboboxSelected>>", lambda event: play_button.focus())
 
-about_button = tk.Button(tk_root, text="About", command=about_action)
-about_button.pack(pady=5)
+    play_button = tk.Button(tk_root, text="Play", command=play_action)
+    play_button.pack(pady=5)
 
-stop_button = tk.Button(tk_root, text="Stop", command=stop)
-stop_button.pack(pady=5)
+    about_button = tk.Button(tk_root, text="About", command=about_action)
+    about_button.pack(pady=5)
 
-refresh_button = tk.Button(tk_root, text="Refresh Profiles", command=refresh_profiles)
-refresh_button.pack(pady=5)
+    stop_button = tk.Button(tk_root, text="Stop", command=stop)
+    stop_button.pack(pady=5)
 
-tk_root.mainloop()
+    refresh_button = tk.Button(tk_root, text="Refresh Profiles", command=refresh_profiles)
+    refresh_button.pack(pady=5)
+
+    tk_root.mainloop()

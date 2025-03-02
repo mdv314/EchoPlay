@@ -85,9 +85,13 @@ def voice_model():
         exit(0)
 
 def run(multiprocessing_queue):
-    global queue
-    queue = multiprocessing_queue
-    voice_model()
+    # global queue
+    # queue = multiprocessing_queue
+    # voice_model()
+    while True:
+        user_inp = input()
+        print(f"user input {user_inp}")
+        multiprocessing_queue.put(input_cleaner(user_inp))
 
 if __name__ == "__main__":
     queue = multiprocessing.Queue()
