@@ -1,12 +1,16 @@
 {
-    "synonyms":[
+    "synonyms": [
         {
             "keyword_match": "b",
-            "synonym_words": ["be"]
+            "synonym_words": [
+                "be"
+            ]
         },
         {
             "keyword_match": "y",
-            "synonym_words": ["why"]
+            "synonym_words": [
+                "why"
+            ]
         }
     ]
 }

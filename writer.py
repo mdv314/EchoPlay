@@ -1,6 +1,13 @@
 from RealtimeSTT import AudioToTextRecorder
 import multiprocessing
-from handler import input_cleaner
+# from handler import input_cleaner
+
+#delete this later, just for testing synonyms
+import string
+def input_cleaner(str_inp):
+    cleaned = str_inp.translate(str.maketrans('', '', string.punctuation)).lower()
+    return " ".join(cleaned.split())
+
 
 def print_text(text):
     if text:
@@ -85,13 +92,18 @@ def voice_model():
         exit(0)
 
 def run(multiprocessing_queue):
-    # global queue
-    # queue = multiprocessing_queue
-    # voice_model()
-    while True:
-        user_inp = input()
-        print(f"user input {user_inp}")
-        multiprocessing_queue.put(input_cleaner(user_inp))
+    global queue
+    queue = multiprocessing_queue
+    voice_model()
+    # print("In writer.run")
+    # while True:
+    #     user_inp = "be"
+    #     if not user_inp:
+    #         continue
+    #     else:
+    #         print(f"user input {user_inp}")
+    #         multiprocessing_queue.put(input_cleaner(user_inp))
+    #         break
 
 if __name__ == "__main__":
     queue = multiprocessing.Queue()

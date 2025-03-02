@@ -263,16 +263,19 @@ def edit_profiles():
 
 
 
-def start_handler(profile_name):
+def start_handler(profile_name, synonyms=False):
     """Starts the handler and writer processes with a shared queue."""
     global queue, handler_process, writer_process
     queue = multiprocessing.Queue()
-    handler_process = multiprocessing.Process(target=process_queue, args=(queue, profile_name))
+    handler_process = multiprocessing.Process(target=process_queue, args=(queue, profile_name, synonyms))
     handler_process.start()
     writer_process = multiprocessing.Process(target=run, args=(queue,))
     writer_process.start()
 
+
+share_bool = True
 def play_action():
+    global share_bool
     selected_profile = profile_var.get()
     if selected_profile == "Edit Profiles...":
         edit_profiles()  # Open the profile editor
@@ -280,9 +283,10 @@ def play_action():
         messagebox.showinfo("Play", f"Playing with profile: {selected_profile}")
         solution_dir = os.path.dirname(os.path.abspath(__file__))
         venv_python = os.path.join(solution_dir, "echoplay", "bin", "python")
-        start_handler(selected_profile)  # Start game handler
+        start_handler(selected_profile, share_bool)  # Start game handler
     else:
         messagebox.showwarning("Warning", "Please select a profile.")
+    share_bool = not share_bool
     
 
 def about_action():
