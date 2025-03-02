@@ -1,0 +1,89 @@
+{
+    "synonyms": [
+        {
+            "keyword_match": "y",
+            "synonym_words": [
+                "why"
+            ]
+        },
+        {
+            "keyword_match": "b",
+            "synonym_words": [
+                "be",
+                "bee"
+            ]
+        },
+        {
+            "keyword_match": "trigger right",
+            "synonym_words": [
+            ]
+        },
+        {
+            "keyword_match": "uppercut",
+            "synonym_words": [
+                "were cut",
+                "up were cut"
+            ]
+        },
+        {
+            "keyword_match": "a",
+            "synonym_words": [
+                "hey",
+                "okay"
+            ]
+        },
+        {
+            "keyword_match": "hard right",
+            "synonym_words": [
+                "all right",
+                "hard rate",
+                "hardwrite",
+                "alright right",
+                "hard to write"
+            ]
+        },
+        {
+            "keyword_match": "soft right",
+            "synonym_words": [
+                "software",
+                "off right"
+            ]
+        },
+        {
+            "keyword_match": "go",
+            "synonym_words": [
+                "so"
+            ]
+        },
+        {
+            "keyword_match": "stop",
+            "synonym_words": [
+                "snop"
+            ]
+        },
+        {
+            "keyword_match": "hard left",
+            "synonym_words": [
+                "heart left"
+            ]
+        },
+        {
+            "keyword_match": "soft left",
+            "synonym_words": [
+                "off left",
+                "hardleft",
+                "softline"
+            ]
+        },
+        {
+            "keyword_match": "break",
+            "synonym_words": [
+                "brake"
+            ]
+        },
+        {
+            "keyword_match": "slow",
+            "synonym_words": ["low"]
+        }
+    ]
+}

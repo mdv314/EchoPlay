@@ -25,6 +25,21 @@ def input_cleaner(str_inp):
 def generate_map(filename):
     filename_converted = filename+".json" # converts file name to path
 
+    # synonyms
+    synonyms_path = os.path.join("profiles", "synonyms", "synonyms.json")
+    if os.path.exists(synonyms_path):
+        with open(synonyms_path, "r") as file:
+            synonyms_data = json.load(file)
+    else:
+        synonyms_data = {"synonyms": []}  
+
+    # Create a synonym lookup dictionary (keyword_match -> list of synonyms)
+    synonym_map = {
+        entry["keyword_match"]: entry["synonym_words"]
+        for entry in synonyms_data.get("synonyms", [])
+    }
+
+
     # looking for defaults
     defaults_dir = os.path.join("profiles","defaults")
     if not os.path.exists(defaults_dir):
@@ -37,12 +52,25 @@ def generate_map(filename):
         json_path = os.path.join("profiles", filename_converted)
 
     with open(json_path, "r") as file:
-        keymap = json.load(file)
-    mode = keymap.get("mode") # gets mode (stored in default profiles)
-    action_map = {
-        item["keyword"]: deque(item["keymap"])
-        for item in keymap.get("keywords", [])
-    } # it just makes a double ended queue for the value with the key being keyword
+        keymap_data = json.load(file)
+    mode = keymap_data.get("mode") # gets mode (stored in default profiles)
+    action_map = {}
+    for item in keymap_data.get("keywords", []):
+        keyword = item["keyword"]
+        actions = deque(item["keymap"])
+
+        # add profile mapping
+        action_map[keyword] = actions
+
+        # add synonym mappings
+        if keyword in synonym_map:
+            for synonym in synonym_map[keyword]:
+                action_map[synonym] = actions  
+
+    # action_map = {
+    #     item["keyword"]: deque(item["keymap"])
+    #     for item in keymap_data.get("keywords", [])
+    # } # it just makes a double ended queue for the value with the key being keyword
     return action_map, mode
 
 
@@ -50,20 +78,94 @@ def generate_map(filename):
 # multithreading  shared queue
 #                 |      selected profile
 #                 |      |
-def process_queue(queue, profile_name):
+def process_queue(queue, profile_name, synonym_mode=False):
+    action_map, mode = generate_map(profile_name)
+    print("Mode: ", mode)
+    print("Action Map: ")
+    for action, commands in action_map.items():
+        print(f"{action}: {list(commands)}")
+    
+     # If synonym_mode is enabled, enter the configuration routine
+    if synonym_mode:
+        print(f'=================SYNONYM MODE SYNONYM MODE=================')
+        # --- SYNONYM CONFIG PHASE ---
+        # reload map data for easier iteratoin
+        filename_converted = profile_name + ".json"
+        defaults_dir = os.path.join("profiles", "defaults")
+        if profile_name in [os.path.splitext(f)[0] for f in os.listdir(defaults_dir) if os.path.isfile(os.path.join(defaults_dir, f))]:
+            json_path = os.path.join("profiles", "defaults", filename_converted)
+        else:
+            json_path = os.path.join("profiles", filename_converted)
+        with open(json_path, "r") as file:
+            keymap_data = json.load(file)
+
+        # same for synonyms json
+        synonyms_path = os.path.join("profiles", "synonyms", "synonyms.json")
+        if os.path.exists(synonyms_path):
+            with open(synonyms_path, "r") as file:
+                synonyms_data = json.load(file)
+        else:
+            synonyms_data = {"synonyms": []}
+
+        # make a lookup
+        synonym_lookup = {}
+        for entry in synonyms_data.get("synonyms", []):
+            synonym_lookup[entry["keyword_match"]] = entry["synonym_words"]
+
+        # if keyword has < 2 synonyms
+        # prompt to state the keyword
+        # take first 3 items parsed from model
+        # store as synonym
+        print(f'Waiting 10 seconds for voice model load up')
+        time.sleep(10)
+        for item in keymap_data.get("keywords", []):
+            keyword = item["keyword"]
+            current_syns = synonym_lookup.get(keyword, [])
+            while len(current_syns) < 2:
+                # prompt
+                while not queue.empty():
+                    trash = queue.get_nowait()
+                print(f"Prompt: You have 8 seconds to say the keyword '{keyword}' once.")
+
+                # queue --> string
+                queued_items = []
+                time.sleep(8)
+                while not queue.empty():
+                    queued_items.append(queue.get())
+                input_str = " ".join(queued_items)
+                words = input_str.split()
+
+                # only take the first 3 words 
+                new_synonym = " ".join(words[:3]) if words else ""
+                if new_synonym and new_synonym not in current_syns:
+                    current_syns.append(new_synonym)
+                    synonym_lookup[keyword] = current_syns
+                    print(f"Added new synonym for '{keyword}': '{new_synonym}'")
+                print(f"Waiting 4 seconds...")
+                time.sleep(4)
+
+        # write updated synonyms back to synonyms json
+        updated_synonyms = []
+        for key, syns in synonym_lookup.items():
+            updated_synonyms.append({"keyword_match": key, "synonym_words": syns})
+        synonyms_data["synonyms"] = updated_synonyms
+        with open(synonyms_path, "w") as file:
+            json.dump(synonyms_data, file, indent=4)
+
+        # regen action map
         action_map, mode = generate_map(profile_name)
-        print("Mode: ", mode)
-        print("Action Map: ")
+        print("Updated Action Map with new synonyms:")
         for action, commands in action_map.items():
             print(f"{action}: {list(commands)}")
+        print(f"======= Complete! =======")
+        # --- END SYNONYM CONFIG PHASE ---
+    else:
+        # --- NON SYNONYM CONFIG ---
         # buffer for inp 1 to 3
         lookahead = []
         while True:
             # xbox mode
             if mode == "xbox":
-
-
-
 
                 # grab next queue item, block and wait if none
                 item = queue.get()

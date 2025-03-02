@@ -2,10 +2,10 @@
     "mode": "xbox",
     "keywords": [
         {
-            "keyword": "hard left",
+            "keyword": "soft right",
             "keymap": [
                 "left_joystick_float",
-                -1.0,
+                0.5,
                 0.0,
                 0.5,
                 "left_joystick_float",
@@ -483,18 +483,6 @@
                 "pressXUSB_GAMEPAD_GUIDE",
                 0.5,
                 "releaseXUSB_GAMEPAD_GUIDE"
-            ]
-        },
-        {
-            "keyword": "soft left",
-            "keymap": [
-                "left_joystick_float",
-                -0.5,
-                0.0,
-                0.5,
-                "left_joystick_float",
-                0,
-                0
             ]
         }
     ]

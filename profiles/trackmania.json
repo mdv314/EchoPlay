@@ -43,7 +43,7 @@
                 "left_joystick_float",
                 1.0,
                 0.0,
-                0.5,
+                0.3,
                 "left_joystick_float",
                 0,
                 0
@@ -510,9 +510,36 @@
             ]
         },
         {
-            "keyword": "masdksandkasnd",
+            "keyword": "go",
             "keymap": [
-                "grow"
+                "right_trigger_float",
+                0.8
+            ]
+        },
+        {
+            "keyword": "stop",
+            "keymap": [
+                "right_trigger_float",
+                0.0
+            ]
+        },
+        {
+            "keyword": "slow",
+            "keymap": [
+                "right_trigger",
+                125
+            ]
+        },
+        {
+            "keyword": "break",
+            "keymap": [
+                "right_trigger_float",
+                0.0,
+                "left_trigger_float",
+                1.0,
+                0.3,
+                "left_trigger_float",
+                0.0
             ]
         }
     ]

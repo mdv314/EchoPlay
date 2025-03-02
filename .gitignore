@@ -172,3 +172,4 @@ cython_debug/
 .pypirc
 
 echoplay/
+model_output.txt
