@@ -3,8 +3,9 @@ import multiprocessing
 from handler import input_cleaner
 
 def print_text(text):
+    
     if text:
-        print(f" {text}")
+        # print(f" {text}")
         process_input(text, queue)
         # print(f" {text}")
     else:
@@ -13,6 +14,7 @@ def print_text(text):
 # Gonna remove duplicates before writing (replacement for writer.py)
 def process_input(text, queue):
     # use input cleaning function from handler to clean data
+    f = open("model_output.txt", "a")
     global prev
     prev = []
     text = input_cleaner(text)
@@ -21,18 +23,22 @@ def process_input(text, queue):
     ############# custom data structure #############
     # when the prev list is empty append the current input
     if len(prev) == 0:
-        prev.append(input)
         for str in input:
+            f.write(f"{str} ")
             queue.put(str)
+            prev.append(str)
+        f.write("\n")
     # when the list isn't empty
     else:
-        n = len(input)
-        # if the given input is not the same as what was previously saw (removing the duplcates)
-        if input != prev[-n:]:
-            prev.clear()
-            for str in input:
+        # while prev not in input:
+        if prev == input[:len(prev)]:
+            for str in input[len(prev):]:
+                f.write(f"{str} ")
                 queue.put(str)
                 prev.append(str)
+        else:
+            prev.pop(0)
+    f.close()
     pass
     
 
@@ -91,4 +97,7 @@ def run(multiprocessing_queue):
 
 if __name__ == "__main__":
     queue = multiprocessing.Queue()
+    f = open("model_output.txt", "w")
+    f.write("")
+    f.close()
     run(queue)
