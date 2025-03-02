@@ -1,4 +1,4 @@
-from audio_recorder import AudioToTextRecorder
+from RealtimeSTT import AudioToTextRecorder
 import multiprocessing
 # from handler import input_cleaner
 
