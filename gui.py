@@ -322,15 +322,17 @@ def edit_profiles():
 
 
 
-def start_handler(profile_name):
+def start_handler(profile_name, synonyms=False):
     """Starts the handler and writer processes with a shared queue."""
     global queue, handler_process, writer_process
     queue = multiprocessing.Queue()
-    handler_process = multiprocessing.Process(target=process_queue, args=(queue, profile_name))
+    handler_process = multiprocessing.Process(target=process_queue, args=(queue, profile_name, synonyms))
     handler_process.start()
     writer_process = multiprocessing.Process(target=run, args=(queue,))
     writer_process.start()
 
+
+share_bool = True
 def play_action():
     stop_button.pack(pady=5, before=play_button)
     play_button.pack_forget()
@@ -342,6 +344,15 @@ def play_action():
         start_handler(selected_profile)
     else:
         messagebox.showerror("Warning", "Please select a profile.")
+
+    share_bool = not share_bool
+    
+
+def about_action():
+    about_window = tk.Toplevel(tk_root)
+    about_window.title("About")
+    about_window.geometry("300x150")
+    tk.Label(about_window, text="This is a simple GUI app.", font=("Arial", 12)).pack(pady=20)
 
 def stop():
     play_button.pack(pady=5, before=stop_button)   # Show Play button
@@ -355,7 +366,6 @@ def refresh_profiles():
     """Refresh the profile dropdown options."""
     profile_menu.configure(values=load_profiles())
     profile_var.set("")  # Reset selection
-
 if __name__ == "__main__":
     tk_root = ctk.CTk()
     tk_root.title("EchoPlay")
