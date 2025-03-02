@@ -522,6 +522,13 @@
                 "right_trigger_float",
                 0.0
             ]
+        },
+        {
+            "keyword": "slow",
+            "keymap": [
+                "right_trigger_float",
+                0.5
+            ]
         }
     ]
 }

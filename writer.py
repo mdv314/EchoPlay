@@ -3,7 +3,6 @@ import multiprocessing
 from handler import input_cleaner
 
 def print_text(text):
-    
     if text:
         # print(f" {text}")
         process_input(text, queue)
@@ -15,29 +14,33 @@ def print_text(text):
 def process_input(text, queue):
     # use input cleaning function from handler to clean data
     f = open("model_output.txt", "a")
-    global prev
-    prev = []
     text = input_cleaner(text)
     input = text.split(' ')
     
     ############# custom data structure #############
     # when the prev list is empty append the current input
-    if len(prev) == 0:
-        for str in input:
-            f.write(f"{str} ")
-            queue.put(str)
-            prev.append(str)
-        f.write("\n")
-    # when the list isn't empty
-    else:
-        # while prev not in input:
-        if prev == input[:len(prev)]:
-            for str in input[len(prev):]:
-                f.write(f"{str} ")
-                queue.put(str)
-                prev.append(str)
-        else:
-            prev.pop(0)
+    # if len(prev) == 0:
+    #     for str in input:
+    #         f.write(f"{str} ")
+    #         queue.put(str)
+    #         prev.append(str)
+    #     f.write("\n")
+    # # when the list isn't empty
+    # else:
+    f.write(f"prev before: {prev}\n")
+    while prev != input[:len(prev)] and len(prev)>0:
+        # the first n words of input (where n is the length of previous)
+        prev.pop(0) 
+    f.write(f"prev pop: {prev}\n")
+    
+    for str in input[len(prev):]:
+        f.write(f"{str} ")        
+        queue.put(str)
+        prev.append(str)
+    f.write(f"\n prev after: {prev}\n")
+    f.write("----------------------------------------------")
+    f.write(f"\n")
+
     f.close()
     pass
     
@@ -48,7 +51,8 @@ def placeholder(text):
 
 def voice_model():
     print("WAIT")
-
+    global prev
+    prev = []
 
     recorder_config = {
         'spinner': False,
