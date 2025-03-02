@@ -4,14 +4,14 @@ import customtkinter as ctk
 import multiprocessing
 from tkinter import messagebox, simpledialog
 from handler import process_queue, input_cleaner
-from writer import write_to_queue
+import ast
+from writer import run
+import json
 
 # Initialize CustomTkinter
 ctk.set_appearance_mode("dark")  # Options: "System" (default), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Options: "blue", "green", "dark-blue"
 
-from writer import run
-import json
 
 
 def load_profiles():
@@ -74,32 +74,48 @@ def open_json_table_editor(profile_name, profile_path, data):
     editor_window.title(f"Editing {profile_name}")
     editor_window.geometry("900x600")
 
+    # bring it to focus:
+    editor_window.lift()
+    editor_window.focus_set()
+    editor_window.grab_set()
+
     ctk.CTkLabel(editor_window, text=f"Editing: {profile_name}", font=("Arial", 14)).pack(pady=5)
 
     keywords_data = data.get("keywords", [])
 
     # **Create the custom CTk table**
+    global table_frame, entry_widgets
     table_frame, entry_widgets = create_ctk_table(editor_window, keywords_data)
 
     def add_new_entry():
         """Adds a new keyword-keymap pair to the table dynamically."""
-        new_keyword = keyword_entry.get().strip()
+        global table_frame
+        new_keyword = input_cleaner(keyword_entry.get())
         new_keymap = keymap_entry.get().strip()
 
         if new_keyword and new_keymap:
             try:
-                new_keymap_list = eval(new_keymap)  # Convert string input to list
+                new_keymap_list = ast.literal_eval(new_keymap)
+                print(type(new_keymap_list))  # Safer way to evaluate the string input
                 if isinstance(new_keymap_list, list):
+                    print("If Statement Clear")
                     keywords_data.append({"keyword": new_keyword, "keymap": new_keymap_list})
+                    print("Append Clear")
                     table_frame.destroy()  # Rebuild the table
+                    print("Destroy Clear")
                     global entry_widgets  # Ensure global update
-                    table_frame, entry_widgets = create_ctk_table(editor_window, keywords_data)
+                    # new_table_frame, entry_widgets = create_ctk_table(editor_window, keywords_data)
+                    print("Table Frame Clear")
                 else:
                     messagebox.showerror("Error", "Keymap must be a list.")
             except:
                 messagebox.showerror("Error", "Invalid keymap format. Use list format.")
         else:
-            messagebox.showwarning("Warning", "Keyword and Keymap cannot be empty.")
+            messagebox.showerror("Warning", "Keyword and Keymap cannot be empty.")
+        new_table_frame, entry_widgets = create_ctk_table(editor_window, keywords_data)
+        
+    # table_frame = new_table_frame
+
 
     # **Frame for adding new keywords**
     add_frame = ctk.CTkFrame(editor_window)
@@ -121,7 +137,7 @@ def open_json_table_editor(profile_name, profile_path, data):
 
         # Ensure there are remaining entries to save
         if not entry_widgets:
-            messagebox.showwarning("Warning", "No valid entries to save.")
+            messagebox.showerror("Warning", "No valid entries to save.")
         else:
             # Extract updated values from table, skipping deleted rows
             for keyword_entry, keymap_entry in entry_widgets:
@@ -145,7 +161,7 @@ def open_json_table_editor(profile_name, profile_path, data):
                 json.dump(new_data, f, indent=4)
             messagebox.showinfo("Success", f"Changes saved to {profile_name}")
         else:
-            messagebox.showwarning("Warning", "No valid data to save.")
+            messagebox.showearning("Warning", "No valid data to save.")
 
         editor_window.destroy()
 
@@ -177,6 +193,8 @@ def edit_profiles():
 
     # bring it to focus:
     edit_window.lift()
+    edit_window.focus_set()
+    edit_window.grab_set()
 
     ctk.CTkLabel(edit_window, text="Manage Profiles", font=("Arial", 16)).pack(pady=10)
 
@@ -217,7 +235,7 @@ def edit_profiles():
         """Deletes the selected profile from the list."""
         selected_profile = selected_profile_var.get()
         if not selected_profile:
-            messagebox.showwarning("Warning", "No profile selected.")
+            messagebox.showerror("Warning", "No profile selected.")
             return
 
         confirm = messagebox.askyesno("Delete Profile", f"Are you sure you want to delete '{selected_profile}'?")
@@ -247,6 +265,11 @@ def edit_profiles():
         select_window.title("Select Default Profile")
         select_window.geometry("350x250")
 
+        # bring it to focus:
+        select_window.lift()
+        select_window.focus_set()
+        select_window.grab_set()
+
         ctk.CTkLabel(select_window, text="Select a default profile:", font=("Arial", 14)).pack(pady=10)
 
         button_frame = ctk.CTkScrollableFrame(select_window)
@@ -259,15 +282,21 @@ def edit_profiles():
             # Ask for a new profile name
             new_profile_name = simpledialog.askstring("New Profile", "Enter a name for the new profile:")
             if new_profile_name:
-                new_profile_path = os.path.join(profiles_dir, f"{new_profile_name}.json")
-                default_profile_path = os.path.join(defaults_dir, selected_default)
+                try:
+                    new_profile_path = os.path.join(profiles_dir, f"{new_profile_name}.json")
+                    default_profile_path = os.path.join(defaults_dir, selected_default)
+                except:
+                    messagebox.showerror("Error", "Invalid characters in profile name.")
 
                 # Copy default profile to new profile
                 with open(default_profile_path, "r") as f:
                     default_data = json.load(f)
 
-                with open(new_profile_path, "w") as f:
-                    json.dump(default_data, f, indent=4)
+                try:
+                    with open(new_profile_path, "w") as f:
+                        json.dump(default_data, f, indent=4)
+                except:
+                    messagebox.showerror("Error", "Invalid characters in profile name.")
 
                 # Refresh profiles
                 refresh_profiles()
@@ -303,6 +332,8 @@ def start_handler(profile_name):
     writer_process.start()
 
 def play_action():
+    stop_button.pack(pady=5, before=play_button)
+    play_button.pack_forget()
     selected_profile = profile_var.get()
     if selected_profile == "Edit Profiles...":
         edit_profiles()
@@ -310,9 +341,11 @@ def play_action():
         messagebox.showinfo("Play", f"Playing with profile: {selected_profile}")
         start_handler(selected_profile)
     else:
-        messagebox.showwarning("Warning", "Please select a profile.")
+        messagebox.showerror("Warning", "Please select a profile.")
 
 def stop():
+    play_button.pack(pady=5, before=stop_button)   # Show Play button
+    stop_button.pack_forget()  # Hide Stop button
     handler_process.kill()
     writer_process.kill()
     while not queue.empty():
@@ -332,6 +365,7 @@ if __name__ == "__main__":
 
     ctk.CTkLabel(tk_root, text="Select Profile:", font=("Arial", 16)).pack(pady=5)
     profile_menu = ctk.CTkComboBox(tk_root, variable=profile_var, values=load_profiles())
+    profile_menu.bind("<Key>", lambda e: "break")
     profile_menu.pack(pady=5)
 
     play_button = ctk.CTkButton(tk_root, text="Play", command=play_action)
