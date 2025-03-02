@@ -64,66 +64,6 @@ def create_ctk_table(parent, data):
 
     return scrollable_frame, row_widgets  # Returns table frame & list of entries for saving
 
-
-# def open_json_table_editor(profile_name, profile_path, data):
-#     """Opens a window with a table to edit only 'keywords' and 'keymap'."""
-#     editor_window = ctk.CTkToplevel(tk_root)
-#     editor_window.title(f"Editing {profile_name}")
-#     editor_window.geometry("900x600")
-
-#     ctk.CTkLabel(editor_window, text=f"Editing: {profile_name}", font=("Arial", 14)).pack(pady=5)
-
-#     keywords_data = data.get("keywords", [])
-
-#     # Create the custom table
-#     table_frame, entry_widgets = create_ctk_table(editor_window, keywords_data)
-
-#     # Frame for adding new keywords
-#     add_frame = ctk.CTkFrame(editor_window)
-#     add_frame.pack(pady=5, fill="x")
-
-#     ctk.CTkLabel(add_frame, text="Keyword:").pack(side="left")
-#     keyword_entry = ctk.CTkEntry(add_frame)
-#     keyword_entry.pack(side="left", padx=5)
-
-#     ctk.CTkLabel(add_frame, text="Keymap:").pack(side="left")
-#     keymap_entry = ctk.CTkEntry(add_frame, width=40)
-#     keymap_entry.pack(side="left", padx=5)
-
-#     def add_new_entry():
-#         """Adds a new keyword-keymap pair to the table."""
-#         new_keyword = input_cleaner(keyword_entry.get())
-#         new_keymap = keymap_entry.get().strip()
-
-#         if new_keyword and new_keymap:
-#             try:
-#                 new_keymap_list = eval(new_keymap)
-#                 if isinstance(new_keymap_list, list):
-#                     tree.insert("", "end", values=(new_keyword, str(new_keymap_list)))
-#                     keywords_data.append({"keyword": new_keyword, "keymap": new_keymap_list})
-#                     keyword_entry.delete(0, "end")
-#                     keymap_entry.delete(0, "end")
-#                 else:
-#                     messagebox.showerror("Error", "Keymap must be a list.")
-#             except:
-#                 messagebox.showerror("Error", "Invalid keymap format. Use list format.")
-
-#     ctk.CTkButton(add_frame, text="Add", command=add_new_entry).pack(side="left", padx=5)
-
-#     # Table for editing existing keywords
-#     tree = ctk.CTkFrame(editor_window)
-#     tree.pack(pady=5, fill="both", expand=True)
-
-#     def save_json():
-#         """Save the edited JSON back to the file."""
-#         new_data = {"mode": data.get("mode", ""), "keywords": keywords_data}
-#         with open(profile_path, "w") as f:
-#             json.dump(new_data, f, indent=4)
-#         messagebox.showinfo("Success", f"Changes saved to {profile_name}")
-#         editor_window.destroy()
-
-#     ctk.CTkButton(editor_window, text="Save Changes", command=save_json).pack(pady=5)
-
 def open_json_table_editor(profile_name, profile_path, data):
     """Opens a window with a scrollable table to edit 'keywords' and 'keymap'."""
     editor_window = ctk.CTkToplevel(tk_root)
@@ -172,27 +112,39 @@ def open_json_table_editor(profile_name, profile_path, data):
     ctk.CTkButton(add_frame, text="Add", command=add_new_entry).pack(side="left", padx=5)
 
     def save_json():
-        """Saves edited data to the JSON file."""
+        """Saves edited data to the JSON file while handling deletions gracefully."""
         new_data = {"mode": data.get("mode", ""), "keywords": []}
 
-        # Extract updated values from table
-        for keyword_entry, keymap_entry in entry_widgets:
-            keyword = keyword_entry.get().strip()
-            keymap = keymap_entry.get().strip()
-            try:
-                keymap_list = eval(keymap)  # Convert string to list format
-                if isinstance(keymap_list, list):
-                    new_data["keywords"].append({"keyword": keyword, "keymap": keymap_list})
-                else:
-                    messagebox.showerror("Error", "Keymap must be a list format.")
-            except:
-                messagebox.showerror("Error", "Invalid keymap format.")
+        # Ensure there are remaining entries to save
+        if not entry_widgets:
+            messagebox.showwarning("Warning", "No valid entries to save.")
+        else:
+            # Extract updated values from table, skipping deleted rows
+            for keyword_entry, keymap_entry in entry_widgets:
+                if keyword_entry.winfo_exists() and keymap_entry.winfo_exists():  # Check if widget still exists
+                    keyword = keyword_entry.get().strip()
+                    keymap = keymap_entry.get().strip()
 
-        with open(profile_path, "w") as f:
-            json.dump(new_data, f, indent=4)
+                    if keyword and keymap:  # Ensure both fields are not empty
+                        try:
+                            keymap_list = eval(keymap)  # Convert string to list format
+                            if isinstance(keymap_list, list):
+                                new_data["keywords"].append({"keyword": keyword, "keymap": keymap_list})
+                            else:
+                                messagebox.showerror("Error", "Keymap must be a list format.")
+                        except Exception:
+                            messagebox.showerror("Error", "Invalid keymap format.")
 
-        messagebox.showinfo("Success", f"Changes saved to {profile_name}")
+        # Write updated data to file only if valid keywords exist
+        if new_data["keywords"]:
+            with open(profile_path, "w") as f:
+                json.dump(new_data, f, indent=4)
+            messagebox.showinfo("Success", f"Changes saved to {profile_name}")
+        else:
+            messagebox.showwarning("Warning", "No valid data to save.")
+
         editor_window.destroy()
+
 
     # **Delete Profile Function**
     def delete_profile():
@@ -218,6 +170,9 @@ def edit_profiles():
     edit_window = ctk.CTkToplevel(tk_root)
     edit_window.title("Edit Profiles")
     edit_window.geometry("500x500")
+
+    # bring it to focus:
+    edit_window.lift()
 
     ctk.CTkLabel(edit_window, text="Manage Profiles", font=("Arial", 16)).pack(pady=10)
 
@@ -253,6 +208,7 @@ def edit_profiles():
 
         ctk.CTkButton(scroll_frame, text=profile, command=lambda p=profile: open_json_editor(p)).pack(pady=5, fill="x")
 
+    # not used 
     def delete_profile():
         """Deletes the selected profile from the list."""
         selected_profile = selected_profile_var.get()
