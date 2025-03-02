@@ -10,6 +10,10 @@ from writer import write_to_queue
 ctk.set_appearance_mode("dark")  # Options: "System" (default), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Options: "blue", "green", "dark-blue"
 
+from writer import run
+import json
+
+
 def load_profiles():
     """Load profile names from the 'profiles' directory and append the 'Edit Profiles' option."""
     defaults_dir = os.path.join("profiles", "defaults")
@@ -295,7 +299,7 @@ def start_handler(profile_name):
     queue = multiprocessing.Queue()
     handler_process = multiprocessing.Process(target=process_queue, args=(queue, profile_name))
     handler_process.start()
-    writer_process = multiprocessing.Process(target=write_to_queue, args=(queue,))
+    writer_process = multiprocessing.Process(target=run, args=(queue,))
     writer_process.start()
 
 def play_action():
