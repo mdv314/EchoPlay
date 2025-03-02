@@ -7,6 +7,7 @@ from handler import process_queue, input_cleaner
 import ast
 from writer import run
 import json
+import sys
 
 # Initialize CustomTkinter
 ctk.set_appearance_mode("dark")  # Options: "System" (default), "Dark", "Light"
@@ -322,9 +323,10 @@ def edit_profiles():
 
 
 
-def start_handler(profile_name, synonyms=False):
+def start_handler(profile_name):
     """Starts the handler and writer processes with a shared queue."""
     global queue, handler_process, writer_process
+    synonyms = True if "-s" in sys.argv else False
     queue = multiprocessing.Queue()
     handler_process = multiprocessing.Process(target=process_queue, args=(queue, profile_name, synonyms))
     handler_process.start()
@@ -332,7 +334,6 @@ def start_handler(profile_name, synonyms=False):
     writer_process.start()
 
 
-share_bool = True
 def play_action():
     stop_button.pack(pady=5, before=play_button)
     play_button.pack_forget()
@@ -345,7 +346,6 @@ def play_action():
     else:
         messagebox.showerror("Warning", "Please select a profile.")
 
-    share_bool = not share_bool
     
 
 def about_action():

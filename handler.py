@@ -87,8 +87,9 @@ def process_queue(queue, profile_name, synonym_mode=False):
     
      # If synonym_mode is enabled, enter the configuration routine
     if synonym_mode:
-        # --- SYNONYM CONFIGURATION PHASE ---
-        # Re-load the profile keymap data (to iterate over the original keywords)
+        print(f'=================SYNONYM MODE SYNONYM MODE=================')
+        # --- SYNONYM CONFIG PHASE ---
+        # reload map data for easier iteratoin
         filename_converted = profile_name + ".json"
         defaults_dir = os.path.join("profiles", "defaults")
         if profile_name in [os.path.splitext(f)[0] for f in os.listdir(defaults_dir) if os.path.isfile(os.path.join(defaults_dir, f))]:
@@ -98,7 +99,7 @@ def process_queue(queue, profile_name, synonym_mode=False):
         with open(json_path, "r") as file:
             keymap_data = json.load(file)
 
-        # Load the existing synonyms file (or create a default structure)
+        # same for synonyms json
         synonyms_path = os.path.join("profiles", "synonyms", "synonyms.json")
         if os.path.exists(synonyms_path):
             with open(synonyms_path, "r") as file:
@@ -106,38 +107,44 @@ def process_queue(queue, profile_name, synonym_mode=False):
         else:
             synonyms_data = {"synonyms": []}
 
-        # Build a lookup: keyword -> list of synonyms
+        # make a lookup
         synonym_lookup = {}
         for entry in synonyms_data.get("synonyms", []):
             synonym_lookup[entry["keyword_match"]] = entry["synonym_words"]
 
-        # For each keyword in the profile, check if it has fewer than 2 synonyms.
-        # If so, "prompt" the user (here we simply print a message) and then
-        # take all items from the queue as the input string, select the first 3 words,
-        # and store that as a synonym for the keyword.
+        # if keyword has < 2 synonyms
+        # prompt to state the keyword
+        # take first 3 items parsed from model
+        # store as synonym
+        print(f'Waiting 10 seconds for voice model load up')
+        time.sleep(10)
         for item in keymap_data.get("keywords", []):
             keyword = item["keyword"]
             current_syns = synonym_lookup.get(keyword, [])
-            if len(current_syns) < 2:
-                # Prompt the user to say the keyword once
-                # (Replace the following print statement with your actual prompt logic)
-                print(f"Prompt: Please say the keyword '{keyword}' once.")
+            while len(current_syns) < 2:
+                # prompt
+                while not queue.empty():
+                    trash = queue.get_nowait()
+                print(f"Prompt: You have 8 seconds to say the keyword '{keyword}' once.")
 
-                # Empty the queue into a string (words separated by spaces)
+                # queue --> string
                 queued_items = []
+                time.sleep(8)
                 while not queue.empty():
                     queued_items.append(queue.get())
                 input_str = " ".join(queued_items)
                 words = input_str.split()
 
-                # Only take the first 3 words (if available)
+                # only take the first 3 words 
                 new_synonym = " ".join(words[:3]) if words else ""
                 if new_synonym and new_synonym not in current_syns:
                     current_syns.append(new_synonym)
                     synonym_lookup[keyword] = current_syns
                     print(f"Added new synonym for '{keyword}': '{new_synonym}'")
+                print(f"Waiting 4 seconds...")
+                time.sleep(4)
 
-        # Write the updated synonyms back to the synonyms file
+        # write updated synonyms back to synonyms json
         updated_synonyms = []
         for key, syns in synonym_lookup.items():
             updated_synonyms.append({"keyword_match": key, "synonym_words": syns})
@@ -145,87 +152,89 @@ def process_queue(queue, profile_name, synonym_mode=False):
         with open(synonyms_path, "w") as file:
             json.dump(synonyms_data, file, indent=4)
 
-        # Regenerate the action map to include the new synonyms
+        # regen action map
         action_map, mode = generate_map(profile_name)
         print("Updated Action Map with new synonyms:")
         for action, commands in action_map.items():
             print(f"{action}: {list(commands)}")
-        # --- END SYNONYM CONFIGURATION PHASE ---
+        print(f"======= Complete! =======")
+        # --- END SYNONYM CONFIG PHASE ---
+    else:
+        # --- NON SYNONYM CONFIG ---
+        # buffer for inp 1 to 3
+        lookahead = []
+        while True:
+            # xbox mode
+            if mode == "xbox":
 
-    # buffer for inp 1 to 3
-    lookahead = []
-    while True:
-        # xbox mode
-        if mode == "xbox":
+                # grab next queue item, block and wait if none
+                item = queue.get()
 
-            # grab next queue item, block and wait if none
-            item = queue.get()
+                # stop button
+                if item == "STOP":
+                    print(f"Handler.py received STOP signal in shared queue. Stopping...")
+                    sys.exit()
+                
+                # add item to buffer if not ending execution
+                lookahead.append(item)
 
-            # stop button
-            if item == "STOP":
-                print(f"Handler.py received STOP signal in shared queue. Stopping...")
-                sys.exit()
-            
-            # add item to buffer if not ending execution
-            lookahead.append(item)
+                # # clean input
+                # lookahead[0] = input_cleaner(lookahead[0]) #remove to optimize
+                print(f"Handler processing: {item}")
 
-            # # clean input
-            # lookahead[0] = input_cleaner(lookahead[0]) #remove to optimize
-            print(f"Handler processing: {item}")
+                # debug buffer dump
+                for item_print in lookahead:
+                    print(f"Buffer: {item_print}")
 
-            # debug buffer dump
-            for item_print in lookahead:
-                print(f"Buffer: {item_print}")
+                # get the corresponding actions for the input
+                execution_items = action_map.get(lookahead[0])
 
-            # get the corresponding actions for the input
-            execution_items = action_map.get(lookahead[0])
-
-            # Stretch goal: implement timeout later
-            # if 1 input valid
-            if execution_items:
-                handle_xbox(execution_items, queue) # execute 1
-                lookahead.pop(0) # rm 1
-            else: # if 1 input invalid
-                if len(lookahead) < 2: # wait
-                    continue
-                inp_one_and_two = ' '.join( (lookahead[0], lookahead[1]) ) # input 1 + input 2 with spaces
-                execution_items = action_map.get(inp_one_and_two) # 1 + 2 validity check
-                # if 1 + 2 input valid
+                # Stretch goal: implement timeout later
+                # if 1 input valid
                 if execution_items:
-                    handle_xbox(execution_items, queue) # execute 1 + 2
+                    handle_xbox(execution_items, queue) # execute 1
                     lookahead.pop(0) # rm 1
-                    lookahead.pop(0) # rm 2
-                else: # if 1 + 2 input invalid
-                    inp_two = lookahead[1] # input 2
-                    execution_items = action_map.get(inp_two) # 2 validity check
-                    # if 2 input valid
+                else: # if 1 input invalid
+                    if len(lookahead) < 2: # wait
+                        continue
+                    inp_one_and_two = ' '.join( (lookahead[0], lookahead[1]) ) # input 1 + input 2 with spaces
+                    execution_items = action_map.get(inp_one_and_two) # 1 + 2 validity check
+                    # if 1 + 2 input valid
                     if execution_items:
-                        handle_xbox(execution_items, queue) # execute 2
+                        handle_xbox(execution_items, queue) # execute 1 + 2
                         lookahead.pop(0) # rm 1
                         lookahead.pop(0) # rm 2
-                    else: # if 2 input invalid
-                        if len(lookahead) < 3: # wait
-                            continue
-                        inp_one_and_two_and_three = ' '.join( (lookahead[0], lookahead[1], lookahead[2]) ) # input 1 + input 2 + input 3 with spaces
-                        execution_items = action_map.get(inp_one_and_two_and_three) # 1 + 2 + 3 validity check
-                        # if 1 + 2 + 3 input valid
+                    else: # if 1 + 2 input invalid
+                        inp_two = lookahead[1] # input 2
+                        execution_items = action_map.get(inp_two) # 2 validity check
+                        # if 2 input valid
                         if execution_items:
-                            handle_xbox(execution_items, queue) # execute 1 + 2 + 3 inputs
+                            handle_xbox(execution_items, queue) # execute 2
                             lookahead.pop(0) # rm 1
                             lookahead.pop(0) # rm 2
-                            lookahead.pop(0) # rm 3
-                        else: # if 1 + 2 + 3 invalid
-                            inp_two_three = ' '.join( (lookahead[1], lookahead[2]) ) # input 2 + 3 with spaces
-                            execution_items = action_map.get(inp_two_three) # 2 + 3 validity check
-                            # if 2 + 3 valid
+                        else: # if 2 input invalid
+                            if len(lookahead) < 3: # wait
+                                continue
+                            inp_one_and_two_and_three = ' '.join( (lookahead[0], lookahead[1], lookahead[2]) ) # input 1 + input 2 + input 3 with spaces
+                            execution_items = action_map.get(inp_one_and_two_and_three) # 1 + 2 + 3 validity check
+                            # if 1 + 2 + 3 input valid
                             if execution_items:
-                                handle_xbox(execution_items, queue) # execute 2 + 3 inputs
+                                handle_xbox(execution_items, queue) # execute 1 + 2 + 3 inputs
                                 lookahead.pop(0) # rm 1
                                 lookahead.pop(0) # rm 2
                                 lookahead.pop(0) # rm 3
-                            else: # 2 + 3 non-valid
-                                lookahead.pop(0) # rm 1
-                                lookahead.pop(0) # rm 2
+                            else: # if 1 + 2 + 3 invalid
+                                inp_two_three = ' '.join( (lookahead[1], lookahead[2]) ) # input 2 + 3 with spaces
+                                execution_items = action_map.get(inp_two_three) # 2 + 3 validity check
+                                # if 2 + 3 valid
+                                if execution_items:
+                                    handle_xbox(execution_items, queue) # execute 2 + 3 inputs
+                                    lookahead.pop(0) # rm 1
+                                    lookahead.pop(0) # rm 2
+                                    lookahead.pop(0) # rm 3
+                                else: # 2 + 3 non-valid
+                                    lookahead.pop(0) # rm 1
+                                    lookahead.pop(0) # rm 2
                                 
                                     
 
