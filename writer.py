@@ -104,6 +104,9 @@ def voice_model():
 def run(multiprocessing_queue):
     global queue
     queue = multiprocessing_queue
+    f = open("model_output.txt", "w")
+    f.write("")
+    f.close()
     voice_model()
     # print("In writer.run")
     # while True:
@@ -117,7 +120,4 @@ def run(multiprocessing_queue):
 
 if __name__ == "__main__":
     queue = multiprocessing.Queue()
-    f = open("model_output.txt", "w")
-    f.write("")
-    f.close()
     run(queue)

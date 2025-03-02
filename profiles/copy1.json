@@ -2,30 +2,6 @@
     "mode": "xbox",
     "keywords": [
         {
-            "keyword": "soft left",
-            "keymap": [
-                "left_joystick_float",
-                -0.5,
-                0.0,
-                0.5,
-                "left_joystick_float",
-                0,
-                0
-            ]
-        },
-        {
-            "keyword": "hard left",
-            "keymap": [
-                "left_joystick_float",
-                -1.0,
-                0.0,
-                0.5,
-                "left_joystick_float",
-                0,
-                0
-            ]
-        },
-        {
             "keyword": "soft right",
             "keymap": [
                 "left_joystick_float",
