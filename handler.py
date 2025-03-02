@@ -88,8 +88,8 @@ def process_queue(queue, profile_name, synonym_mode=False):
      # If synonym_mode is enabled, enter the configuration routine
     if synonym_mode:
         print(f'=================SYNONYM MODE SYNONYM MODE=================')
-        # --- SYNONYM CONFIGURATION PHASE ---
-        # Re-load the profile keymap data (to iterate over the original keywords)
+        # --- SYNONYM CONFIG PHASE ---
+        # reload map data for easier iteratoin
         filename_converted = profile_name + ".json"
         defaults_dir = os.path.join("profiles", "defaults")
         if profile_name in [os.path.splitext(f)[0] for f in os.listdir(defaults_dir) if os.path.isfile(os.path.join(defaults_dir, f))]:
@@ -99,7 +99,7 @@ def process_queue(queue, profile_name, synonym_mode=False):
         with open(json_path, "r") as file:
             keymap_data = json.load(file)
 
-        # Load the existing synonyms file (or create a default structure)
+        # same for synonyms json
         synonyms_path = os.path.join("profiles", "synonyms", "synonyms.json")
         if os.path.exists(synonyms_path):
             with open(synonyms_path, "r") as file:
@@ -107,28 +107,27 @@ def process_queue(queue, profile_name, synonym_mode=False):
         else:
             synonyms_data = {"synonyms": []}
 
-        # Build a lookup: keyword -> list of synonyms
+        # make a lookup
         synonym_lookup = {}
         for entry in synonyms_data.get("synonyms", []):
             synonym_lookup[entry["keyword_match"]] = entry["synonym_words"]
 
-        # For each keyword in the profile, check if it has fewer than 2 synonyms.
-        # If so, "prompt" the user (here we simply print a message) and then
-        # take all items from the queue as the input string, select the first 3 words,
-        # and store that as a synonym for the keyword.
+        # if keyword has < 2 synonyms
+        # prompt to state the keyword
+        # take first 3 items parsed from model
+        # store as synonym
         print(f'Waiting 10 seconds for voice model load up')
         time.sleep(10)
         for item in keymap_data.get("keywords", []):
             keyword = item["keyword"]
             current_syns = synonym_lookup.get(keyword, [])
             while len(current_syns) < 2:
-                # Prompt the user to say the keyword once
-                # (Replace the following print statement with your actual prompt logic)
+                # prompt
                 while not queue.empty():
                     trash = queue.get_nowait()
                 print(f"Prompt: You have 8 seconds to say the keyword '{keyword}' once.")
 
-                # Empty the queue into a string (words separated by spaces)
+                # queue --> string
                 queued_items = []
                 time.sleep(8)
                 while not queue.empty():
@@ -136,7 +135,7 @@ def process_queue(queue, profile_name, synonym_mode=False):
                 input_str = " ".join(queued_items)
                 words = input_str.split()
 
-                # Only take the first 3 words (if available)
+                # only take the first 3 words 
                 new_synonym = " ".join(words[:3]) if words else ""
                 if new_synonym and new_synonym not in current_syns:
                     current_syns.append(new_synonym)
@@ -145,7 +144,7 @@ def process_queue(queue, profile_name, synonym_mode=False):
                 print(f"Waiting 4 seconds...")
                 time.sleep(4)
 
-        # Write the updated synonyms back to the synonyms file
+        # write updated synonyms back to synonyms json
         updated_synonyms = []
         for key, syns in synonym_lookup.items():
             updated_synonyms.append({"keyword_match": key, "synonym_words": syns})
@@ -153,14 +152,15 @@ def process_queue(queue, profile_name, synonym_mode=False):
         with open(synonyms_path, "w") as file:
             json.dump(synonyms_data, file, indent=4)
 
-        # Regenerate the action map to include the new synonyms
+        # regen action map
         action_map, mode = generate_map(profile_name)
         print("Updated Action Map with new synonyms:")
         for action, commands in action_map.items():
             print(f"{action}: {list(commands)}")
         print(f"======= Complete! =======")
-        # --- END SYNONYM CONFIGURATION PHASE ---
+        # --- END SYNONYM CONFIG PHASE ---
     else:
+        # --- NON SYNONYM CONFIG ---
         # buffer for inp 1 to 3
         lookahead = []
         while True:
